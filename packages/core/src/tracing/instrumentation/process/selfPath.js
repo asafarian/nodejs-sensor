@@ -15,8 +15,4 @@ if (!fs.existsSync(exports.collectorPath)) {
   logger.debug('Unable to find path to @instana/collector, edgemicro instrumentation will not be available.');
   exports.collectorPath = null;
   exports.immediate = null;
-} else {
-  logger.debug(
-    "Found path to @instana/collector at '" + exports.collectorPath + "', edgemicro instrumentation will be available."
-  );
 }

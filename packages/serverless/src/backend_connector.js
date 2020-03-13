@@ -23,7 +23,7 @@ const stopSendingOnFailure = true;
 let requestHasFailed = false;
 let warningsHaveBeenLogged = false;
 
-const needsEcdhCurveFix = semver.lt(process.version, '10.0.0');
+const needsEcdhCurveFix = semver.gte(process.version, '8.6.0') && semver.lt(process.version, '10.0.0');
 const legacyTimeoutHandling = semver.lt(process.version, '10.0.0');
 
 if (process.env[timeoutEnvVar]) {
@@ -56,10 +56,16 @@ if (process.env[proxyEnvVar] && !environmentUtil.sendUnencrypted) {
   );
 }
 
-let identityProvider;
+let hostHeader;
 
-exports.init = function init(identityProvider_, logger_) {
-  identityProvider = identityProvider_;
+exports.init = function init(identityProvider, logger_) {
+  if (identityProvider) {
+    hostHeader = identityProvider.getHostHeader();
+    if (hostHeader == null) {
+      hostHeader = 'nodejs-serverless';
+    }
+  }
+
   logger = logger_;
   requestHasFailed = false;
 };
@@ -116,6 +122,7 @@ function send(resourcePath, payload, destroySocketAfterwards, callback) {
   }
 
   payload = JSON.stringify(payload);
+
   const options = {
     hostname: environmentUtil.getBackendHost(),
     port: environmentUtil.getBackendPort(),
@@ -124,7 +131,7 @@ function send(resourcePath, payload, destroySocketAfterwards, callback) {
     headers: {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(payload),
-      [constants.xInstanaHost]: identityProvider ? identityProvider.getHostHeader() : 'nodejs-aws-lambda',
+      [constants.xInstanaHost]: hostHeader,
       [constants.xInstanaKey]: environmentUtil.getInstanaAgentKey(),
       [constants.xInstanaTime]: Date.now()
     },

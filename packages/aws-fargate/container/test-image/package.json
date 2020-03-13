@@ -1,0 +1,15 @@
+{
+  "name": "fargate-test-app",
+  "version": "1.0.0",
+  "description": "a trivial test application",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/instana/nodejs-sensor.git"
+  },
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bastian Krol <bastian.krol@instana.com>",
+  "license": "ISC"
+}

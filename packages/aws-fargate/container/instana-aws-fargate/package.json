@@ -1,0 +1,15 @@
+{
+  "name": "instana-aws-fargate-docker-image",
+  "version": "1.0.0",
+  "description": "Provides @instana/aws-fargate as an image for multi stage Dockerfiles",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/instana/nodejs-sensor.git"
+  },
+  "author": "Bastian Krol <bastian.krol@instana.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@instana/serverless": "instana-serverless-1.97.0.tgz",
+    "@instana/aws-fargate": "instana-aws-fargate-1.97.0.tgz"
+  }
+}
