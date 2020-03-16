@@ -9,7 +9,10 @@ const { tracing } = instanaCore;
 
 // @instana/collector sends span data every second. To reduce HTTP overhead,
 // we throttle this back to once every 5 seconds.
-const config = { tracing: { transmissionDelay: 5000 } };
+const config = {
+  tracing: {
+  }
+};
 
 let logger = consoleLogger;
 
@@ -18,7 +21,8 @@ function init() {
     logger.setLevel(process.env.INSTANA_DEBUG ? 'debug' : process.env.INSTANA_LOG_LEVEL);
   }
 
-  identityProvider.init('TODO');
+  identityProvider.init({
+  });
   backendConnector.init(identityProvider, logger);
 
   instanaCore.init(config, backendConnector, identityProvider);
