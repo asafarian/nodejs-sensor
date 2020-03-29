@@ -4,10 +4,11 @@ const { metrics: coreMetrics } = require('@instana/core');
 
 const simpleSnapshotAttribute = require('./simple');
 
-exports.init = function init(config, taskDefinitionVersionArn) {
+exports.init = function init(config, taskDefinition, taskDefinitionVersion) {
   coreMetrics.registerAdditionalMetrics([
     //
-    simpleSnapshotAttribute.create('taskDefVer', taskDefinitionVersionArn)
+    simpleSnapshotAttribute.create('taskDefinition', taskDefinition),
+    simpleSnapshotAttribute.create('taskDefinitionVersion', taskDefinitionVersion)
   ]);
 
   coreMetrics.init(config);

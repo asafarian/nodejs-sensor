@@ -16,9 +16,6 @@ const region = 'us-east-2';
 const account = '555123456789';
 const taskDefinition = 'nodejs-fargate-test-task-definition';
 const taskDefinitionVersion = '42';
-const taskDefinitionVersionArn =
-  //
-  `arn:aws:ecs:${region}:${account}:task-definition/${taskDefinition}:${taskDefinitionVersion}`;
 const qualifiedArn = `arn:aws:ecs:${region}:${account}:task/55566677-c1e5-5780-9806-aabbccddeeff`;
 
 const instanaAgentKey = 'aws-fargate-dummy-key';
@@ -74,7 +71,8 @@ describe('AWS fargate integration test', function() {
     expect(metrics.versions.v8).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.uv).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.zlib).to.match(/\d+\.\d+\.\d+/);
-    expect(metrics.taskDefVer).to.equal(taskDefinitionVersionArn);
+    expect(metrics.taskDefinition).to.equal(taskDefinition);
+    expect(metrics.taskDefinitionVersion).to.equal(taskDefinitionVersion);
     verifyHeaders(allPlugins);
   }
 

@@ -5,7 +5,6 @@ const fetch = require('node-fetch');
 const instanaCore = require('@instana/core');
 const { backendConnector, consoleLogger } = require('@instana/serverless');
 
-const arnParser = require('./arn_parser');
 const identityProvider = require('./identity_provider');
 const metrics = require('./metrics');
 
@@ -58,12 +57,6 @@ function init() {
       const taskArn = json.Labels['com.amazonaws.ecs.task-arn'];
       const taskDefinition = json.Labels['com.amazonaws.ecs.task-definition-family'];
       const taskDefinitionVersion = json.Labels['com.amazonaws.ecs.task-definition-version'];
-      const taskDefinitionVersionArn = arnParser.toTaskDefinitionVersionArn(
-        arnParser.parseTaskArn(taskArn),
-        taskDefinition,
-        taskDefinitionVersion
-      );
-
       identityProvider.init({
         arn: taskArn
       });
@@ -71,7 +64,7 @@ function init() {
 
       instanaCore.init(config, backendConnector, identityProvider);
 
-      metrics.init(config, taskDefinitionVersionArn);
+      metrics.init(config, taskDefinition, taskDefinitionVersion);
       metrics.activate();
       metricsSender.activate(metrics, backendConnector, metricsData => ({
         plugins: [
