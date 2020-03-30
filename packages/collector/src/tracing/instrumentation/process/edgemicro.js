@@ -2,7 +2,7 @@
 
 var cluster = require('cluster');
 
-var requireHook = require('../../../util/requireHook');
+var requireHook = require('@instana/core').util.requireHook;
 var selfPath = require('./selfPath');
 
 var logger;
@@ -25,7 +25,7 @@ function instrumentReloadCluster(reloadClusterModule) {
     if (!selfPath.immediate) {
       logger.warn(
         "Detected a call to 'edgemicro/cli/lib/reload-cluster', but the path to @instana/collector is not available, " +
-          'so he edgemicro workers will not be instrumented.'
+          'so the edgemicro workers will not be instrumented.'
       );
       return reloadClusterModule.apply(this, arguments);
     }
