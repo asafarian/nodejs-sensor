@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- [AWS Fargate]: In-process data collection for AWS Fargate tasks via new package @instana/aws-fargate.
+
 ## 1.97.0
 - [AWS Lambda] Add support for `INSTANA_ENDPOINT_PROXY` (send data to Instana via a proxy).
 - Add support for Node.js 14.
