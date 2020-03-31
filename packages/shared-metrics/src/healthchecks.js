@@ -1,10 +1,11 @@
 'use strict';
 
 var requireHook = require('@instana/core').util.requireHook;
-var logger;
-logger = require('../logger').getLogger('metrics/healthchecks', function(newLogger) {
-  logger = newLogger;
-});
+
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
 
 var timeBetweenHealthcheckCalls;
 var healthy = 1;

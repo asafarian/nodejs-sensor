@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 
-const testUtils = require('../../../core/test/test_util');
-const directDependencies = require('../../src/metrics/directDependencies');
+const testUtils = require('../../core/test/test_util');
+const directDependencies = require('../src/directDependencies');
 
 describe('metrics.directDependencies', () => {
   it('should use the correct payload prefix', () => {
@@ -16,7 +16,7 @@ describe('metrics.directDependencies', () => {
     expect(directDependencies.currentPayload.optionalDependencies).to.exist;
   });
 
-  it('should provide the set of depencies with versions', () => {
+  it('should provide the set of dependencies with versions', () => {
     directDependencies.activate();
 
     return testUtils.retry(() => {
@@ -33,7 +33,7 @@ describe('metrics.directDependencies', () => {
       expect(deps.growl).to.equal('1.10.5');
       expect(deps.he).to.equal('1.2.0');
       expect(deps.minimatch).to.equal('3.0.4');
-      expect(deps.mkdirp).to.equal('0.5.1');
+      expect(deps.mkdirp).to.equal('0.5.4');
       expect(deps['supports-color']).to.equal('6.0.0');
       expect(directDependencies.currentPayload.peerDependencies).to.deep.equal({});
       expect(directDependencies.currentPayload.optionalDependencies).to.deep.equal({});

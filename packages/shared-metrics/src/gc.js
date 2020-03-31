@@ -1,11 +1,11 @@
 'use strict';
 
-var logger;
-logger = require('../logger').getLogger('metrics/gc', function(newLogger) {
-  logger = newLogger;
-});
-
 var slidingWindow = require('@instana/core').util.slidingWindow;
+
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
 
 var windowOpts = { duration: 1000 };
 var minorGcWindow = slidingWindow.create(windowOpts);

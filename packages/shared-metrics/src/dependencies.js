@@ -4,10 +4,11 @@ var path = require('path');
 var fs = require('fs');
 
 var applicationUnderMonitoring = require('@instana/core').util.applicationUnderMonitoring;
-var logger;
-logger = require('../logger').getLogger('metrics/dependencies', function(newLogger) {
-  logger = newLogger;
-});
+
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
 
 exports.payloadPrefix = 'dependencies';
 exports.currentPayload = {};

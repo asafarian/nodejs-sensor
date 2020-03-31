@@ -1,0 +1,29 @@
+'use strict';
+
+exports.allMetrics = [
+  require('./activeHandles'),
+  require('./activeRequests'),
+  require('./args'),
+  require('./dependencies'),
+  require('./directDependencies'),
+  require('./description'),
+  require('./directDependencies'),
+  require('./execArgs'),
+  require('./gc'),
+  require('./healthchecks'),
+  require('./heapSpaces'),
+  require('./http'),
+  require('./keywords'),
+  require('./libuv'),
+  require('./memory'),
+  require('./name'),
+  require('./version')
+];
+
+exports.setLogger = function setLogger(logger) {
+  exports.allMetrics.forEach(function(metricModule) {
+    if (typeof metricModule.setLogger === 'function') {
+      metricModule.setLogger(logger);
+    }
+  });
+};

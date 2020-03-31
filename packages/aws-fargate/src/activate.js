@@ -95,6 +95,7 @@ exports.setLogger = function setLogger(_logger) {
   logger = _logger;
   config.logger = logger;
   instanaCore.logger.init(config);
+  metrics.setLogger(_logger);
 };
 
 exports.opentracing = tracing.opentracing;

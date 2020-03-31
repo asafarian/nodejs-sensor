@@ -1,10 +1,11 @@
 'use strict';
 
 var applicationUnderMonitoring = require('@instana/core').util.applicationUnderMonitoring;
-var logger;
-logger = require('../logger').getLogger('metrics/version', function(newLogger) {
-  logger = newLogger;
-});
+
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
 
 exports.payloadPrefix = 'version';
 exports.currentPayload = undefined;

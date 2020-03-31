@@ -1,13 +1,14 @@
 'use strict';
 
 var applicationUnderMonitoring = require('@instana/core').util.applicationUnderMonitoring;
-var logger;
-logger = require('../logger').getLogger('metrics/name', function(newLogger) {
-  logger = newLogger;
-});
 
-exports.payloadPrefix = 'name';
-exports.currentPayload = undefined;
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
+
+exports.payloadPrefix = 'keywords';
+exports.currentPayload = [];
 
 exports.activate = function() {
   applicationUnderMonitoring.getMainPackageJson(function(err, pckg) {
@@ -15,8 +16,8 @@ exports.activate = function() {
       logger.warn('Failed to determine main package json. Reason: ', err.message, err.stack);
     }
 
-    if (!err && pckg) {
-      exports.currentPayload = pckg.name;
+    if (!err && pckg && pckg.keywords) {
+      exports.currentPayload = pckg.keywords;
     }
   });
 };

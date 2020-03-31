@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const fs = require('fs');
 
-const activeRequests = require('../../src/metrics/activeRequests');
+const activeRequests = require('../src/activeRequests');
 
 describe('metrics.activeRequests', () => {
   it('should export active requests count', () => {

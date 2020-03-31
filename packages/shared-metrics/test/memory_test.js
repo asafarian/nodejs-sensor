@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 
-const testUtils = require('../../../core/test/test_util');
-const memory = require('../../src/metrics/memory');
+const testUtils = require('../../core/test/test_util');
+const memory = require('../src/memory');
 
 describe('metrics.memory', () => {
   afterEach(() => {

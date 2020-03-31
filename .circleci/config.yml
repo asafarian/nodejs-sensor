@@ -40,6 +40,10 @@ shared: &shared
           - v3-serverless-dependencies-{{ .Environment.CIRCLE_JOB }}-
     - restore_cache:
         keys:
+          - v3-shared-metrics-dependencies-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages/shared-metrics/package-lock.json" }}
+          - v3-shared-metrics-dependencies-{{ .Environment.CIRCLE_JOB }}-
+    - restore_cache:
+        keys:
           - v3-collector-dependencies-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages/collector/package-lock.json" }}
           - v3-collector-dependencies-{{ .Environment.CIRCLE_JOB }}-
     - restore_cache:
@@ -83,6 +87,10 @@ shared: &shared
         paths:
           - packages/serverless/node_modules
         key: v3-serverless-dependencies-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages/serverless/package-lock.json" }}
+    - save_cache:
+        paths:
+          - packages/shared-metrics/node_modules
+        key: v3-shared-metrics-dependencies-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages/shared-metrics/package-lock.json" }}
     - save_cache:
         paths:
           - packages/collector/node_modules

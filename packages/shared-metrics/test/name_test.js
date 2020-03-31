@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 
-const testUtils = require('../../../core/test/test_util');
-const name = require('../../src/metrics/name');
+const testUtils = require('../../core/test/test_util');
+const name = require('../src/name');
 
 describe('metrics.name', () => {
   it('should export a name payload prefix', () => {

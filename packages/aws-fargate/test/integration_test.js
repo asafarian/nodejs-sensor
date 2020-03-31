@@ -68,11 +68,17 @@ describe('AWS fargate integration test', function() {
     expect(metrics.startTime).to.be.at.most(Date.now());
     expect(metrics.versions).to.be.an('object');
     expect(metrics.versions.node).to.match(/\d+\.\d+\.\d+/);
+    expect(`v${metrics.versions.node}`).to.equal(process.version);
     expect(metrics.versions.v8).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.uv).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.zlib).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.taskDefinition).to.equal(taskDefinition);
     expect(metrics.taskDefinitionVersion).to.equal(taskDefinitionVersion);
+    // also check for shared metrics based on native add-ons
+    expect(metrics.activeHandles).to.exist;
+    expect(metrics.gc.minorGcs).to.exist;
+    expect(metrics.gc.majorGcs).to.exist;
+    expect(metrics.healthchecks).to.exist;
     verifyHeaders(allPlugins);
   }
 

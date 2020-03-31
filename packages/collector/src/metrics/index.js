@@ -1,10 +1,17 @@
 'use strict';
 
 var coreMetrics = require('@instana/core').metrics;
+var sharedMetrics = require('@instana/shared-metrics');
 
-var additionalMetricsModules = coreMetrics.findAndRequire(__dirname);
+var sharedMetricsLogger = require('../logger').getLogger('metrics', function(newLogger) {
+  sharedMetrics.setLogger(newLogger);
+});
+sharedMetrics.setLogger(sharedMetricsLogger);
 
-coreMetrics.registerAdditionalMetrics(additionalMetricsModules);
+coreMetrics.registerAdditionalMetrics(sharedMetrics.allMetrics);
+
+var additionalCollectorMetrics = coreMetrics.findAndRequire(__dirname);
+coreMetrics.registerAdditionalMetrics(additionalCollectorMetrics);
 
 exports.init = function(config) {
   coreMetrics.init(config);

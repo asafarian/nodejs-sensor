@@ -1,9 +1,9 @@
 'use strict';
 
-var logger;
-logger = require('../logger').getLogger('metrics/libuv', function(newLogger) {
-  logger = newLogger;
-});
+var logger = require('@instana/core').logger.getLogger('metrics');
+exports.setLogger = function(_logger) {
+  logger = _logger;
+};
 
 var eventLoopStats;
 try {
