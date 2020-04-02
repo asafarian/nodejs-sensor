@@ -19,7 +19,7 @@ let backendTimeout = defaultTimeout;
 const proxyEnvVar = 'INSTANA_ENDPOINT_PROXY';
 let proxyAgent;
 
-const stopSendingOnFailure = true;
+let stopSendingOnFailure = true;
 let requestHasFailed = false;
 let warningsHaveBeenLogged = false;
 
@@ -58,7 +58,8 @@ if (process.env[proxyEnvVar] && !environmentUtil.sendUnencrypted) {
 
 let hostHeader;
 
-exports.init = function init(identityProvider, logger_) {
+exports.init = function init(identityProvider, _logger, _stopSendingOnFailure) {
+  stopSendingOnFailure = _stopSendingOnFailure == null ? true : _stopSendingOnFailure;
   if (identityProvider) {
     hostHeader = identityProvider.getHostHeader();
     if (hostHeader == null) {
@@ -66,12 +67,12 @@ exports.init = function init(identityProvider, logger_) {
     }
   }
 
-  logger = logger_;
+  logger = _logger;
   requestHasFailed = false;
 };
 
-exports.setLogger = function setLogger(logger_) {
-  logger = logger_;
+exports.setLogger = function setLogger(_logger) {
+  logger = _logger;
 };
 
 exports.sendBundle = function sendBundle(bundle, destroySocketAfterwards, callback) {

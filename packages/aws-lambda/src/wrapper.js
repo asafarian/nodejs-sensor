@@ -210,7 +210,7 @@ function init(event, arnInfo, _config) {
   }
 
   identityProvider.init(arnInfo);
-  backendConnector.init(identityProvider, logger);
+  backendConnector.init(identityProvider, logger, true);
 
   instanaCore.init(config, backendConnector, identityProvider);
 

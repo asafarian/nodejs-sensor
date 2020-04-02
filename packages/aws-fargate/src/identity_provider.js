@@ -1,23 +1,25 @@
 'use strict';
 
-let qualifiedArn;
+let taskArn;
+let containerId;
 
-exports.init = function init(arnInfo) {
-  qualifiedArn = arnInfo.arn;
+exports.init = function init(_taskArn, _containerId) {
+  taskArn = _taskArn;
+  containerId = _containerId;
 };
 
 exports.getHostHeader = function getHostHeader() {
-  return qualifiedArn;
+  return taskArn;
 };
 
 exports.getEntityId = function getEntityId() {
-  return qualifiedArn;
+  return containerId;
 };
 
 exports.getFrom = function getFrom() {
   return {
     hl: true,
     cp: 'aws',
-    e: qualifiedArn
+    e: containerId
   };
 };

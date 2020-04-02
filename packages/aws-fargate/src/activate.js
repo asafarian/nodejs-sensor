@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const instanaCore = require('@instana/core');
 const { backendConnector, consoleLogger } = require('@instana/serverless');
 
+const { fullyQualifiedContainerId, readSnapshotData } = require('./metadata');
 const identityProvider = require('./identity_provider');
 const metrics = require('./metrics');
 
@@ -54,28 +55,29 @@ function init() {
         return;
       }
 
-      const taskArn = json.Labels['com.amazonaws.ecs.task-arn'];
-      const taskDefinition = json.Labels['com.amazonaws.ecs.task-definition-family'];
-      const taskDefinitionVersion = json.Labels['com.amazonaws.ecs.task-definition-version'];
-      identityProvider.init({
-        arn: taskArn
-      });
-      backendConnector.init(identityProvider, logger);
+      try {
+        const snapshotData = readSnapshotData(json);
+        const containerId = fullyQualifiedContainerId(snapshotData);
+        identityProvider.init(snapshotData.taskArn, containerId);
+        backendConnector.init(identityProvider, logger, false);
 
-      instanaCore.init(config, backendConnector, identityProvider);
+        instanaCore.init(config, backendConnector, identityProvider);
 
-      metrics.init(config, taskDefinition, taskDefinitionVersion);
-      metrics.activate();
-      metricsSender.activate(metrics, backendConnector, metricsData => ({
-        plugins: [
-          {
-            name: 'com.instana.plugin.aws.fargatetask',
-            entityId: identityProvider.getEntityId(),
-            data: metricsData
-          }
-        ]
-      }));
-      tracing.activate();
+        metrics.init(config, containerId, snapshotData);
+        metrics.activate();
+        metricsSender.activate(metrics, backendConnector, metricsData => ({
+          plugins: [
+            {
+              name: 'com.instana.plugin.aws.ecs.task',
+              entityId: identityProvider.getEntityId(),
+              data: metricsData
+            }
+          ]
+        }));
+        tracing.activate();
+      } catch (e) {
+        logger.error('Initializing @instana/aws-fargate failed. This fargate task will not be monitored.', e);
+      }
     })
     .catch(e => {
       logger.error(`Fetching metadata from ${metadataUri} failed. This fargate task will not be monitored.`, e);

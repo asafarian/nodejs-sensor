@@ -14,9 +14,15 @@ const downstreamDummyUrl = `http://localhost:${downstreamDummyPort}/`;
 
 const region = 'us-east-2';
 const account = '555123456789';
+const containerName = 'nodejs-fargate-test-container';
 const taskDefinition = 'nodejs-fargate-test-task-definition';
 const taskDefinitionVersion = '42';
-const qualifiedArn = `arn:aws:ecs:${region}:${account}:task/55566677-c1e5-5780-9806-aabbccddeeff`;
+const taskArn = `arn:aws:ecs:${region}:${account}:task/55566677-c1e5-5780-9806-aabbccddeeff`;
+const image = `${account}.dkr.ecr.us-east-2.amazonaws.com/${taskDefinition}:latest`;
+const imageId = 'sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+const clusterName = 'nodejs-fargate-test-cluster';
+const clusterArn = `arn:aws:ecs:us-east-2:${account}:cluster/${clusterName}`;
+const containerId = `${taskArn}::${containerName}`;
 
 const instanaAgentKey = 'aws-fargate-dummy-key';
 
@@ -44,14 +50,14 @@ describe('AWS fargate integration test', function() {
 
   function verify(response) {
     expect(response).to.equal('Hello Fargate!');
-    return retry(() => getAndVerifyMetrics().then(() => getAndVerifySpans()));
+    return retry(() => getAndVerifySnapshotDataAndMetrics().then(() => getAndVerifySpans()));
   }
 
-  function getAndVerifyMetrics() {
-    return control.getMetrics().then(metrics => verifyMetrics(metrics));
+  function getAndVerifySnapshotDataAndMetrics() {
+    return control.getMetrics().then(metrics => verifySnapshotDataAndMetrics(metrics));
   }
 
-  function verifyMetrics(allMetrics) {
+  function verifySnapshotDataAndMetrics(allMetrics) {
     expect(allMetrics).to.exist;
     expect(allMetrics).to.be.an('array');
     expect(allMetrics).to.have.lengthOf.at.least(1);
@@ -60,10 +66,24 @@ describe('AWS fargate integration test', function() {
     expect(allPlugins.plugins).to.have.lengthOf(1);
     const pluginData = allPlugins.plugins[0];
     expect(pluginData.data).to.exist;
-    expect(pluginData.name).to.equal('com.instana.plugin.aws.fargatetask');
-    expect(pluginData.entityId).to.equal(qualifiedArn);
+    expect(pluginData.name).to.equal('com.instana.plugin.aws.ecs.task');
+    expect(pluginData.entityId).to.equal(containerId);
     const metrics = pluginData.data;
     expect(Object.keys(pluginData)).to.have.lengthOf(3); // name, entityId, data
+
+    expect(metrics.containerId).to.equal(containerId);
+    expect(metrics.containerName).to.equal(containerName);
+    expect(metrics.image).to.equal(image);
+    expect(metrics.imageId).to.equal(imageId);
+    expect(metrics.taskArn).to.equal(taskArn);
+    expect(metrics.taskDefinition).to.equal(taskDefinition);
+    expect(metrics.taskDefinitionVersion).to.equal(taskDefinitionVersion);
+    expect(metrics.clusterArn).to.equal(clusterArn);
+    expect(metrics.limits.cpu).to.equal(0);
+    expect(metrics.limits.memory).to.equal(0);
+    expect(metrics.createdAt).to.equal('2020-03-25T14:34:29.936120727Z');
+    expect(metrics.startedAt).to.equal('2020-03-25T14:34:31.56264157Z');
+
     expect(metrics.sensorVersion).to.match(/1\.\d\d+\.\d+/);
     expect(metrics.startTime).to.be.at.most(Date.now());
     expect(metrics.versions).to.be.an('object');
@@ -72,8 +92,6 @@ describe('AWS fargate integration test', function() {
     expect(metrics.versions.v8).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.uv).to.match(/\d+\.\d+\.\d+/);
     expect(metrics.versions.zlib).to.match(/\d+\.\d+\.\d+/);
-    expect(metrics.taskDefinition).to.equal(taskDefinition);
-    expect(metrics.taskDefinitionVersion).to.equal(taskDefinitionVersion);
     // also check for shared metrics based on native add-ons
     expect(metrics.activeHandles).to.exist;
     expect(metrics.gc.minorGcs).to.exist;
@@ -102,7 +120,7 @@ describe('AWS fargate integration test', function() {
       expect(span.f.h).to.not.exist;
       expect(span.f.hl).to.be.true;
       expect(span.f.cp).to.equal('aws');
-      expect(span.f.e).to.equal(qualifiedArn);
+      expect(span.f.e).to.equal(containerId);
       expect(span.data.http.method).to.equal('GET');
       expect(span.data.http.url).to.equal('/');
       expect(span.data.http.host).to.equal('127.0.0.1:4215');
@@ -123,7 +141,7 @@ describe('AWS fargate integration test', function() {
       expect(span.f.h).to.not.exist;
       expect(span.f.hl).to.be.true;
       expect(span.f.cp).to.equal('aws');
-      expect(span.f.e).to.equal(qualifiedArn);
+      expect(span.f.e).to.equal(containerId);
       expect(span.data.http).to.be.an('object');
       expect(span.data.http.method).to.equal('GET');
       expect(span.data.http.url).to.equal(downstreamDummyUrl);
@@ -135,7 +153,7 @@ describe('AWS fargate integration test', function() {
   function verifyHeaders(payload) {
     const headers = payload._receivedHeaders;
     expect(headers).to.exist;
-    expect(headers['x-instana-host']).to.equal(qualifiedArn);
+    expect(headers['x-instana-host']).to.equal(taskArn);
     expect(headers['x-instana-key']).to.equal(instanaAgentKey);
     expect(headers['x-instana-time']).to.be.a('string');
   }

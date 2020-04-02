@@ -2,19 +2,24 @@
 
 const { metrics: coreMetrics } = require('@instana/core');
 const { consoleLogger } = require('@instana/serverless');
-var sharedMetrics = require('@instana/shared-metrics');
+const sharedMetrics = require('@instana/shared-metrics');
 
 const simpleSnapshotAttribute = require('./simple');
 
 sharedMetrics.setLogger(consoleLogger);
 
-exports.init = function init(config, taskDefinition, taskDefinitionVersion) {
+exports.init = function init(config, containerId, snapshotData) {
   coreMetrics.registerAdditionalMetrics(sharedMetrics.allMetrics);
-  coreMetrics.registerAdditionalMetrics([
-    //
-    simpleSnapshotAttribute.create('taskDefinition', taskDefinition),
-    simpleSnapshotAttribute.create('taskDefinitionVersion', taskDefinitionVersion)
-  ]);
+  coreMetrics.registerAdditionalMetrics(
+    [
+      simpleSnapshotAttribute.create('runtime', 'node'),
+      simpleSnapshotAttribute.create('containerId', containerId)
+    ].concat(
+      Object.keys(snapshotData).map(function(key) {
+        return simpleSnapshotAttribute.create(key, snapshotData[key]);
+      })
+    )
+  );
 
   coreMetrics.init(config);
 };

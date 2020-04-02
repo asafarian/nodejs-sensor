@@ -9,7 +9,8 @@
   "author": "Bastian Krol <bastian.krol@instana.com>",
   "license": "ISC",
   "dependencies": {
+    "@instana/aws-fargate": "instana-aws-fargate-1.97.0.tgz",
     "@instana/serverless": "instana-serverless-1.97.0.tgz",
-    "@instana/aws-fargate": "instana-aws-fargate-1.97.0.tgz"
+    "@instana/shared-metrics": "instana-shared-metrics-1.97.0.tgz"
   }
 }

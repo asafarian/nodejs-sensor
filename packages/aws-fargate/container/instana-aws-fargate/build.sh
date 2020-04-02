@@ -18,6 +18,12 @@ npm pack
 mv instana-serverless-*.tgz ../aws-fargate/container/instana-aws-fargate
 popd > /dev/null
 
+pushd ../../../shared-metrics > /dev/null
+rm -f instana-shared-metrics-*.tgz
+npm pack
+mv instana-shared-metrics-*.tgz ../aws-fargate/container/instana-aws-fargate
+popd > /dev/null
+
 pushd ../.. > /dev/null
 rm -f instana-aws-fargate-*.tgz
 npm pack

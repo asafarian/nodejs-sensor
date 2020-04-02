@@ -32,6 +32,7 @@ docker \
   --env INSTANA_AGENT_KEY=$instana_agent_key \
   --env ECS_CONTAINER_METADATA_URI=$metadata_v3 \
   --env INSTANA_LOG_LEVEL=debug \
+  --env INSTANA_DEV_SEND_UNENCRYPTED=true \
   -p 3000:3000 \
   --name $containername \
   $imagetag
