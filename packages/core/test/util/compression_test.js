@@ -4,6 +4,10 @@ const expect = require('chai').expect;
 const compression = require('../../src/util/compression');
 
 describe('compression', () => {
+  beforeEach(() => {
+    compression.clearBlacklist();
+  });
+
   it('should comparse primitive values', () => {
     expect(compression(42, 43)).to.deep.equal(43);
     expect(compression(true, false)).to.deep.equal(false);
@@ -54,6 +58,59 @@ describe('compression', () => {
 
     it('should resend the whole array when any of the values changes', () => {
       expect(compression({ data: [1, 2, 3] }, { data: [1, 2, 4] })).to.deep.equal({ data: [1, 2, 4] });
+    });
+  });
+
+  describe('blacklisting', () => {
+    beforeEach(() => {
+      compression.setBlacklist([
+        //
+        ['path', 'blacklistedPrimitive'],
+        ['path', 'blacklistedObject'],
+        ['path', 'blacklistedArray']
+      ]);
+    });
+
+    it('should always report properties which have been blacklisted for compression', () => {
+      expect(
+        compression(
+          {
+            path: {
+              nonBlacklistedPrimitive: 42,
+              nonBlacklistedObject: { foo: 'bar' },
+              nonBlacklistedArray: [1, 2, 3],
+              blacklistedPrimitive: 43,
+              blacklistedObject: { foo: 'baz' },
+              blacklistedArray: [1, 2, 3],
+              changingPrimitive: 42,
+              changingObject: { bar: 'foo' },
+              changingArray: [1, 2, 3]
+            }
+          },
+          {
+            path: {
+              nonBlacklistedPrimitive: 42,
+              nonBlacklistedObject: { foo: 'bar' },
+              nonBlacklistedArray: [1, 2, 3],
+              blacklistedPrimitive: 43,
+              blacklistedObject: { foo: 'baz' },
+              blacklistedArray: [1, 2, 3],
+              changingPrimitive: 666,
+              changingObject: { bar: 'boo' },
+              changingArray: [1, 2, 3, 4]
+            }
+          }
+        )
+      ).to.deep.equal({
+        path: {
+          blacklistedPrimitive: 43,
+          blacklistedObject: { foo: 'baz' },
+          blacklistedArray: [1, 2, 3],
+          changingPrimitive: 666,
+          changingObject: { bar: 'boo' },
+          changingArray: [1, 2, 3, 4]
+        }
+      });
     });
   });
 });

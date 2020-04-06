@@ -61,6 +61,11 @@ function init() {
         identityProvider.init(snapshotData.taskArn, containerId);
         backendConnector.init(identityProvider, logger, false);
 
+        instanaCore.util.compression.setBlacklist([
+          //
+          ['taskDefinition'],
+          ['taskDefinitionVersion']
+        ]);
         instanaCore.init(config, backendConnector, identityProvider);
 
         metrics.init(config, containerId, snapshotData);
@@ -68,7 +73,7 @@ function init() {
         metricsSender.activate(metrics, backendConnector, metricsData => ({
           plugins: [
             {
-              name: 'com.instana.plugin.aws.ecs.task',
+              name: 'com.instana.plugin.aws.ecs.container',
               entityId: identityProvider.getEntityId(),
               data: metricsData
             }

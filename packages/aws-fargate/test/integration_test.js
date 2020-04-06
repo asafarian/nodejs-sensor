@@ -66,7 +66,7 @@ describe('AWS fargate integration test', function() {
     expect(allPlugins.plugins).to.have.lengthOf(1);
     const pluginData = allPlugins.plugins[0];
     expect(pluginData.data).to.exist;
-    expect(pluginData.name).to.equal('com.instana.plugin.aws.ecs.task');
+    expect(pluginData.name).to.equal('com.instana.plugin.aws.ecs.container');
     expect(pluginData.entityId).to.equal(containerId);
     const metrics = pluginData.data;
     expect(Object.keys(pluginData)).to.have.lengthOf(3); // name, entityId, data
