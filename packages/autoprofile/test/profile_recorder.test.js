@@ -15,6 +15,8 @@ describe('ProfileRecorder', () => {
     it('should send profiles and empty the queue', (done) => {
       let lastProfiles;
 
+      profiler.profileRecorder.reset();
+
       profiler.sendProfiles = function(profiles, callback) {
         lastProfiles = profiles;
 

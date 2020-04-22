@@ -52,7 +52,7 @@ describe('AsyncSampler', () => {
       let frames = sampler.createStackTrace(sample, true);
 
       let found = false;
-      for (let frame of frames.values()) {
+      for (let frame of frames) {
         if (frame.getFileName().match(/async_sampler.test.js/)) {
           found = true;
         }

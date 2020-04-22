@@ -79,9 +79,9 @@ class AllocationSampler {
   buildProfile(duration, timespan) {
     let self = this;
 
-    let roots = [];
+    let roots = new Set();
     for (let child of self.top.children.values()) {
-      roots.push(child);
+      roots.add(child);
     }
 
     let profile = new Profile(

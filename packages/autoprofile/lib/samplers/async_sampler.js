@@ -197,7 +197,7 @@ class AsyncSampler {
 
       // update profile
       let node = self.top;
-      for (let frame of frames.values()) {
+      for (let frame of frames) {
         let methodName = '';
         if (frame.getFunctionName()) {
           methodName = frame.getFunctionName();
@@ -274,9 +274,9 @@ class AsyncSampler {
   buildProfile(duration, timespan) {
     let self = this;
 
-    let roots = [];
+    let roots = new Set();
     for (let child of self.top.children.values()) {
-      roots.push(child);
+      roots.add(child);
     }
 
     let profile = new Profile(

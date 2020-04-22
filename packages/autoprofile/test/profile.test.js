@@ -15,12 +15,12 @@ describe('Profile', () => {
 
   describe('toJson()', () => {
     it('should convert profile to json', (done) => {
-      let roots = [];
+      let roots = new Set();
 
       let root1 = new CallSite(profiler, 'meth1', 'file1', 1);
       root1.measurement = 10;
       root1.numSamples = 1;
-      roots.push(root1);
+      roots.add(root1);
 
       let child1 = new CallSite(profiler, 'meth2', 'file2', 2);
       child1.measurement = 5;
