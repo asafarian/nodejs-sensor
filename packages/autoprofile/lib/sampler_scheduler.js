@@ -1,10 +1,6 @@
 'use strict';
 
-const os = require('os');
-
-
 class SamplerScheduler {
-  
   constructor(profiler, sampler, config) {
     let self = this;
 
@@ -101,8 +97,7 @@ class SamplerScheduler {
 
     try {
       self.sampler.startSampler();
-    }
-    catch(err) {
+    } catch (err) {
       self.profiler.samplerActive = false;
       self.profiler.exception(err);
       return null;
@@ -122,18 +117,15 @@ class SamplerScheduler {
         self.sampler.stopSampler();
         self.profiler.samplerActive = false;
         self.profiler.debug(self.config.logPrefix + ': stopped.');
-      }
-      catch(err) {
+      } catch (err) {
         self.profiler.samplerActive = false;
         self.profiler.exception(err);
       }
     }
 
-    let stopTimer = self.profiler.setTimeout(() => {
+    self.profiler.setTimeout(() => {
       _stop();
     }, self.config.maxSpanDuration);
-
-    return;
   }
 
 

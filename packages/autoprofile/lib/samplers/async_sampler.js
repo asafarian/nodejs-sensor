@@ -1,6 +1,5 @@
 'use strict';
 
-const os = require('os');
 const fs = require('fs');
 const util = require('util');
 const CallSite = require('../profile').CallSite;
@@ -9,16 +8,15 @@ const Profile = require('../profile').Profile;
 
 
 class AsyncSampler {
-  
   constructor(profiler) {
     let self = this;
 
     self.EXCLUDE_SAMPLE_TYPES = {
-      'TIMERWRAP': true,
-      'Timeout': true,
-      'Immediate': true,
-      'TickObject': true,
-      'PROMISE': true
+      TIMERWRAP: true,
+      Timeout: true,
+      Immediate: true,
+      TickObject: true,
+      PROMISE: true
     };
     self.MAX_FRAMES = 50;
     self.SAMPLE_LIMIT = 500;
@@ -40,7 +38,7 @@ class AsyncSampler {
       return false;
     }
 
-    if (!self.profiler.matchVersion("v8.1.0", null)) {
+    if (!self.profiler.matchVersion('v8.1.0', null)) {
       self.profiler.log('Async sampler is supported starting Node.js v8.1.0');
       return false;
     }
@@ -63,7 +61,7 @@ class AsyncSampler {
 
     function generateStackTrace(skip) {
       var orig = Error.prepareStackTrace;
-      Error.prepareStackTrace = function(error, structuredStackTrace) {
+      Error.prepareStackTrace = function(err, structuredStackTrace) {
         return structuredStackTrace;
       };
 
@@ -73,14 +71,13 @@ class AsyncSampler {
 
       if (stack) {
         return stack.slice(skip);
-      }
-      else {
+      } else {
         return null;
       }
     }
 
 
-    function init(asyncId, type, triggerAsyncId, resource) {
+    function init(asyncId, type, triggerAsyncId) {
       try {
         if (self.sampleLimitReached) {
           return;
@@ -99,8 +96,7 @@ class AsyncSampler {
           stack: generateStackTrace(3),
           time: null
         });
-      }
-      catch(err) {
+      } catch (err) {
         error(err);
       }
     }
@@ -114,8 +110,7 @@ class AsyncSampler {
         }
 
         sample.time = self.hrmillis() - sample.start;
-      }
-      catch(err) {
+      } catch (err) {
         error(err);
       }
     }
@@ -132,7 +127,7 @@ class AsyncSampler {
       self.initSampler();
     }
 
-    self.top = new CallSite(self.profiler, "", "", 0);
+    self.top = new CallSite(self.profiler, '', '', 0);
     self.profileDuration = 0;
   }
 
@@ -155,10 +150,9 @@ class AsyncSampler {
     // calculate actual record duration
     if (!self.sampleLimitReached) {
       self.profileDuration += self.hrmillis() - self.spanStart;
-    }
-    else {
+    } else {
       let spanEnd = self.spanStart;
-      for(let sample of self.samples.values()) {
+      for (let sample of self.samples.values()) {
         if (sample.time) {
           let sampleEnd = sample.start + sample.time;
           if (sampleEnd > spanEnd) {
@@ -176,7 +170,7 @@ class AsyncSampler {
 
     self.updateProfile();
 
-    self.samples.clear();    
+    self.samples.clear();
   }
 
 
@@ -185,7 +179,7 @@ class AsyncSampler {
 
     let includeAgentFrames = self.profiler.getOption('includeAgentFrames');
 
-    for(let sample of self.samples.values()) {
+    for (let sample of self.samples.values()) {
       if (!sample.time) {
         continue;
       }
@@ -253,7 +247,7 @@ class AsyncSampler {
           profilerStack = true;
         }
       });
-      if(profilerStack) {
+      if (profilerStack) {
         return;
       }
     }
@@ -286,9 +280,9 @@ class AsyncSampler {
     }
 
     let profile = new Profile(
-      self.profiler, 
-      Profile.c.CATEGORY_TIME, 
-      Profile.c.TYPE_ASYNC_CALLS, 
+      self.profiler,
+      Profile.c.CATEGORY_TIME,
+      Profile.c.TYPE_ASYNC_CALLS,
       Profile.c.UNIT_MILLISECOND,
       roots,
       duration,
@@ -302,7 +296,6 @@ class AsyncSampler {
     const t = process.hrtime();
     return t[0] * 1e3 + t[1] / 1e6;
   }
-
 }
 
 exports.AsyncSampler = AsyncSampler;

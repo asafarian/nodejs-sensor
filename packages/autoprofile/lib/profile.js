@@ -23,7 +23,6 @@ const profileConstants = {
 
 
 class CallSite {
-
   constructor(profiler, methodName, fileName, fileLine, columnNumber) {
     let self = this;
 
@@ -37,9 +36,9 @@ class CallSite {
     self.children = new Map();
   }
 
-  
+
   createKey(methodName, fileName, fileLine) {
-    return methodName + " (" + fileName + ":" + fileLine + ")";
+    return methodName + ' (' + fileName + ':' + fileLine + ')';
   }
 
 
@@ -126,12 +125,11 @@ exports.CallSite = CallSite;
 
 
 class Profile {
-
   constructor(profiler, category, type, unit, roots, duration, timespan) {
     let self = this;
 
     self.profiler = profiler;
-    self.processId = "" + process.pid;
+    self.processId = '' + process.pid;
     self.id = profiler.utils.generateUuid();
     self.runtime = Profile.c.RUNTIME_NODEJS;
     self.category = category;

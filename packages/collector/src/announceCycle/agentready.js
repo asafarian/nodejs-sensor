@@ -49,16 +49,16 @@ function enter(_ctx) {
   scheduleTracingMetrics();
 
   if (agentOpts.autoProfile) {
-    let profiler = new autoprofile.AutoProfiler(logger);
+    var profiler = autoprofile.start();
     profiler.sendProfiles = function(profiles, callback) {
       agentConnection.sendProfiles(profiles, callback);
-    }
+    };
     profiler.getExternalPid = function() {
       return pidStore.pid;
-    }
+    };
     profiler.getLogger = function() {
       return logger;
-    }
+    };
     profiler.start();
   }
 

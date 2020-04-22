@@ -10,7 +10,7 @@ const util = require('util');
 
 describe('AsyncSampler', () => {
   let profiler;
-  
+
   beforeEach(() => {
     profiler = global.profiler;
   });
@@ -36,8 +36,7 @@ describe('AsyncSampler', () => {
 
         if (stack) {
           return stack.slice(skip);
-        }
-        else {
+        } else {
           return null;
         }
       }
@@ -54,7 +53,7 @@ describe('AsyncSampler', () => {
 
       let found = false;
       for (let frame of frames.values()) {
-        if(frame.getFileName().match(/async_sampler.test.js/)) {
+        if (frame.getFileName().match(/async_sampler.test.js/)) {
           found = true;
         }
       }
@@ -63,7 +62,6 @@ describe('AsyncSampler', () => {
 
       done();
     });
-
   });
 
 
@@ -86,16 +84,16 @@ describe('AsyncSampler', () => {
 
       let timer;
       server.listen(5001, '127.0.0.1', () => {
-        //let startCpuTime = process.cpuUsage();
+        // let startCpuTime = process.cpuUsage();
         sampler.startSampler();
         setTimeout(() => {
           sampler.stopSampler();
           let profile = sampler.buildProfile(1000, 10);
 
-          //let endCpuTime = process.cpuUsage(startCpuTime)
-          //console.log('CPU time:', (endCpuTime.user + endCpuTime.system) / 1e6);
+          // let endCpuTime = process.cpuUsage(startCpuTime)
+          // console.log('CPU time:', (endCpuTime.user + endCpuTime.system) / 1e6);
 
-          //console.log(profiles[0].profile.dump());
+          // console.log(profiles[0].profile.dump());
           assert(JSON.stringify(profile.toJson()).match(/async_sampler.test.js/));
 
           done();
@@ -104,18 +102,17 @@ describe('AsyncSampler', () => {
         timer = setInterval(() => {
           http.get('http://localhost:5001', (resp) => {
             let data = '';
-           
+
             resp.on('data', (chunk) => {
               data += chunk;
             });
-           
+
             resp.on('end', () => {
             });
-          }).on("error", (err) => {
-            console.log("Error: " + err.message);
+          }).on('error', (err) => {
+            console.log('Error: ' + err.message);
           });
         }, 10);
-
       });
 
       setTimeout(() => {
@@ -123,6 +120,5 @@ describe('AsyncSampler', () => {
         server.close();
       }, 1000);
     });
-  });  
-
+  });
 });

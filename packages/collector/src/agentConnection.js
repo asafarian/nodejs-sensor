@@ -195,8 +195,8 @@ exports.sendSpans = function sendSpans(spans, cb) {
 
 exports.sendProfiles = function sendProfiles(profiles, cb) {
   var callback = atMostOnce('callback for sendProfiles', function(err, responseBody) {
-    if (err && !maxContentErrorHasBeenLogged && err instanceof PayloadTooLargeError) {
-      console.log("Profiles are too big");
+    if (err && err instanceof PayloadTooLargeError) {
+      logger.warn('Profiles are too too large to be sent');
     }
     cb(err, responseBody);
   });

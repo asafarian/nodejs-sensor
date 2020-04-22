@@ -2,7 +2,6 @@
 
 
 class ProfileRecorder {
-
   constructor(profiler) {
     let self = this;
 
@@ -58,7 +57,7 @@ class ProfileRecorder {
     self.queue.push(profile);
 
     // cleanup queue
-    if(self.queue.length > self.profiler.getOption('maxBufferedProfiles')) {
+    if (self.queue.length > self.profiler.getOption('maxBufferedProfiles')) {
       self.queue = self.queue.shift();
     }
 
@@ -95,14 +94,12 @@ class ProfileRecorder {
         // increase backoff up to 1 minute
         if (self.backoffSeconds === 0) {
           self.backoffSeconds = 10;
-        }
-        else if (self.backoffSeconds * 2 < 60) {
+        } else if (self.backoffSeconds * 2 < 60) {
           self.backoffSeconds *= 2;
         }
 
         callback(err);
-      }
-      else {
+      } else {
         // reset backoff
         self.backoffSeconds = 0;
 

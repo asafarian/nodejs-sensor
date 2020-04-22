@@ -1,28 +1,19 @@
+'use strict';
 
-require('../..')({level: 'debug', autoProfile: true})
+require('../..')({level: 'debug', autoProfile: true});
 
 const fs = require('fs');
 const http = require('http');
 
-process.on('uncaughtException', (err) => {
-  // overwrites default exit behaviour
-  //console.log(err);
-});
-
-process.on('unhandledRejection', (err) => {
-  // overwrites default exit behaviour
-  //console.log(err);
-});
-
 
 function cpuWork(usage, duration) {
   let usageTimer = setInterval(() => {
-    for(let i = 0; i < usage * 300000; i++) {
+    for (let i = 0; i < usage * 300000; i++) {
       Math.random();
     }
   }, 1000);
 
-  if(duration) {
+  if (duration) {
     setTimeout(() => {
       clearInterval(usageTimer);
     }, duration * 1000);
@@ -45,13 +36,13 @@ function simulateMemLeak() {
 
   // 30 min
   setInterval(() => {
-    if(n++ > 1800) {
+    if (n++ > 1800) {
       mem1 = [];
       n = 0;
     }
 
-    for(let i = 0; i < 5000; i++) {
-      obj1 = {'v': Math.random()};
+    for (let i = 0; i < 5000; i++) {
+      let obj1 = {v: Math.random()};
       mem1.push(obj1);
     }
   }, 1000);
@@ -59,8 +50,8 @@ function simulateMemLeak() {
   // 5 sec
   setInterval(() => {
     let mem2 = [];
-    for(let i = 0; i < 500; i++) {
-      obj2 = {'v': Math.random()};
+    for (let i = 0; i < 500; i++) {
+      let obj2 = {v: Math.random()};
       mem2.push(obj2);
     }
   }, 5000);
@@ -69,14 +60,12 @@ function simulateMemLeak() {
 
 function simulateHttp() {
   setInterval(() => {
-
     var options = {
       host: '127.0.0.1',
       port: 5005
     };
 
-    var req = http.get(options, (res) => {
-    });
+    var req = http.get(options, () => {});
 
     req.on('error', function(err) {
       console.log(err.message);

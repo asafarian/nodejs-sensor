@@ -1,12 +1,10 @@
 'use strict';
 
-const os = require('os');
 const CallSite = require('../profile').CallSite;
 const Profile = require('../profile').Profile;
 
 
 class AllocationSampler {
-  
   constructor(profiler) {
     let self = this;
 
@@ -34,7 +32,7 @@ class AllocationSampler {
   reset() {
     let self = this;
 
-    self.top = new CallSite(self.profiler, "", "", 0);
+    self.top = new CallSite(self.profiler, '', '', 0);
   }
 
 
@@ -62,8 +60,8 @@ class AllocationSampler {
 
     nodes.forEach((node) => {
       // exclude/include profiler frames
-      if (node.file_name && 
-          !includeAgentFrames && 
+      if (node.file_name &&
+          !includeAgentFrames &&
           self.profiler.AGENT_FRAME_REGEXP.exec(node.file_name)) {
         return;
       }
@@ -87,9 +85,9 @@ class AllocationSampler {
     }
 
     let profile = new Profile(
-      self.profiler, 
-      Profile.c.CATEGORY_MEMORY, 
-      Profile.c.TYPE_MEMORY_ALLOCATION_RATE, 
+      self.profiler,
+      Profile.c.CATEGORY_MEMORY,
+      Profile.c.TYPE_MEMORY_ALLOCATION_RATE,
       Profile.c.UNIT_BYTE,
       roots,
       duration,

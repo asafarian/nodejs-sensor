@@ -1,12 +1,10 @@
 'use strict';
 
-const os = require('os');
 const CallSite = require('../profile').CallSite;
 const Profile = require('../profile').Profile;
 
 
 class CpuSampler {
-  
   constructor(profiler) {
     let self = this;
 
@@ -31,7 +29,7 @@ class CpuSampler {
   reset() {
     let self = this;
 
-    self.top = new CallSite(self.profiler, "", "", 0);
+    self.top = new CallSite(self.profiler, '', '', 0);
     self.profileSamples = 0;
   }
 
@@ -64,9 +62,9 @@ class CpuSampler {
     }
 
     let profile = new Profile(
-      self.profiler, 
-      Profile.c.CATEGORY_CPU, 
-      Profile.c.TYPE_CPU_USAGE, 
+      self.profiler,
+      Profile.c.CATEGORY_CPU,
+      Profile.c.TYPE_CPU_USAGE,
       Profile.c.UNIT_SAMPLE,
       roots,
       duration,
@@ -87,8 +85,8 @@ class CpuSampler {
       }
 
       // exclude/include profiler frames
-      if (node.file_name && 
-          !includeAgentFrames && 
+      if (node.file_name &&
+          !includeAgentFrames &&
           self.profiler.AGENT_FRAME_REGEXP.exec(node.file_name)) {
         return;
       }

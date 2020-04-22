@@ -5,7 +5,7 @@ const assert = require('assert');
 
 describe('Utils', () => {
   let profiler;
-  
+
   beforeEach(() => {
     profiler = global.profiler;
   });
@@ -32,5 +32,4 @@ describe('Utils', () => {
       done();
     });
   });
-
 });
