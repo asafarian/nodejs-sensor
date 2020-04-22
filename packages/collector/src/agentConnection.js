@@ -193,6 +193,17 @@ exports.sendSpans = function sendSpans(spans, cb) {
   sendData('/com.instana.plugin.nodejs/traces.' + pidStore.pid, spans, callback, true);
 };
 
+exports.sendProfiles = function sendProfiles(profiles, cb) {
+  var callback = atMostOnce('callback for sendProfiles', function(err, responseBody) {
+    if (err && !maxContentErrorHasBeenLogged && err instanceof PayloadTooLargeError) {
+      console.log("Profiles are too big");
+    }
+    cb(err, responseBody);
+  });
+
+  sendData('/com.instana.plugin.nodejs/profiles.' + pidStore.pid, profiles, callback, true);
+};
+
 exports.sendEvent = function sendEvent(eventData, cb) {
   var callback = atMostOnce('callback for sendEvent', function(err, responseBody) {
     cb(err, responseBody);
