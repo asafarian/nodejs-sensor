@@ -30,7 +30,8 @@
   },
   "devDependencies": {
     "eslint": "^5.16.0",
-    "mocha": "^6.2.2"
+    "mocha": "^6.2.2",
+    "async": "^3.2.0"
   },
   "main": "index.js",
   "engines": {

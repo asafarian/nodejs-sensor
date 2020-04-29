@@ -4,6 +4,7 @@
 const CpuSampler = require('../../lib/samplers/cpu_sampler').CpuSampler;
 const assert = require('assert');
 const util = require('util');
+const async = require('async');
 
 
 describe('CpuSampler', () => {
@@ -23,21 +24,27 @@ describe('CpuSampler', () => {
       }
       sampler.reset();
 
-      sampler.startSampler();
+      function runTest(callback) {
+        sampler.startSampler();
 
-      setTimeout(() => {
-        sampler.stopSampler();
-        let profile = sampler.buildProfile(500, 10);
+        setTimeout(() => {
+          sampler.stopSampler();
+          let profile = sampler.buildProfile(500, 10);
 
-        // console.log(util.inspect(profile.toJson(), {showHidden: false, depth: null}))
-        assert(JSON.stringify(profile.toJson()).match(/cpu_sampler.test.js/));
-        done();
-      }, 500);
+          // console.log(util.inspect(profile.toJson(), {showHidden: false, depth: null}))
+          callback(null, JSON.stringify(profile.toJson()).match(/cpu_sampler.test.js/));
+        }, 500);
 
-      for (let i = 0; i < 60 * 20000; i++) {
-        let text = 'text' + i;
-        text += 'text2';
+        for (let i = 0; i < 60 * 20000; i++) {
+          let text = 'text' + i;
+          text += 'text2';
+        }
       }
+
+      async.retry({times: 5}, runTest, (err, success) => {
+        assert(success);
+        done();
+      });
     });
   });
 });
