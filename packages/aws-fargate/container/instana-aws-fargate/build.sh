@@ -6,6 +6,12 @@ cd `dirname $BASH_SOURCE`
 
 rm -rf instana-*.tgz
 
+pushd ../../../core > /dev/null
+rm -f instana-core-*.tgz
+npm pack
+mv instana-core-*.tgz ../aws-fargate/container/instana-aws-fargate
+popd > /dev/null
+
 pushd ../../../serverless > /dev/null
 rm -f instana-serverless-*.tgz
 npm pack

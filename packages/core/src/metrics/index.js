@@ -3,14 +3,20 @@
 var fs = require('fs');
 var path = require('path');
 
+var sender = require('./sender');
+
 var config;
 
 exports.findAndRequire = function findAndRequire(baseDir) {
   return fs
     .readdirSync(baseDir)
     .filter(function(moduleName) {
-      // ignore non-JS files and index.js
-      return moduleName.indexOf('.js') === moduleName.length - 3 && moduleName.indexOf('index.js') < 0;
+      // ignore non-JS files and non-metric modules
+      return (
+        moduleName.indexOf('.js') === moduleName.length - 3 &&
+        moduleName.indexOf('index.js') < 0 &&
+        moduleName.indexOf('sender.js') < 0
+      );
     })
     .map(function(moduleName) {
       return require(path.join(baseDir, moduleName));
@@ -25,6 +31,7 @@ exports.registerAdditionalMetrics = function registerAdditionalMetrics(additiona
 
 exports.init = function(_config) {
   config = _config;
+  sender.init(config);
 };
 
 exports.activate = function() {
@@ -52,3 +59,5 @@ exports.gatherData = function gatherData() {
 
   return payload;
 };
+
+exports.sender = sender;

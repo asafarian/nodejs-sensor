@@ -20,9 +20,9 @@ function Control(opts) {
   this.backendBaseUrl = this.opts.backendBaseUrl || `https://localhost:${this.backendPort}/serverless`;
   this.downstreamDummyPort = this.opts.downstreamDummyPort || 4567;
   this.downstreamDummyUrl = this.opts.downstreamDummyUrl || `http://localhost:${this.downstreamDummyPort}`;
+  this.metadataMockPort = this.opts.metadataMockPort || 1604;
+  this.metadataMockUrl = this.opts.metadataMockUrl || `http://localhost:${this.metadataMockPort}`;
   this.instanaAgentKey = this.opts.instanaAgentKey || 'aws-fargate-dummy-key';
-
-  opts.startBackend = true;
 }
 
 Control.prototype = Object.create(AbstractServerlessControl.prototype);
@@ -30,9 +30,7 @@ Control.prototype = Object.create(AbstractServerlessControl.prototype);
 Control.prototype.reset = function reset() {
   AbstractServerlessControl.prototype.reset.call(this);
   this.messageFromFargateTask = [];
-
-  this.fargateErrors = [];
-  this.fargateResults = [];
+  this.messagesFromMetadataMock = [];
 
   this.taskHasStarted = false;
   this.taskHasTerminated = false;
@@ -47,17 +45,42 @@ Control.prototype.registerTestHooks = function registerTestHooks() {
   });
 };
 
+Control.prototype.startAdditionalAuxiliaryProcesses = function startAdditionalAuxiliaryProcesses() {
+  this.metadataMock = fork(path.join(__dirname, './metadata_mock'), {
+    stdio: config.getAppStdio(),
+    env: Object.assign(
+      {
+        METADATA_MOCK_PORT: this.metadataMockPort
+      },
+      process.env,
+      this.opts.env
+    )
+  });
+  this.metadataMock.on('message', message => {
+    this.messagesFromMetadataMock.push(message);
+  });
+  return this.waitUntilProcessIsUp('metadata mock', this.messagesFromMetadataMock, 'metadata mock: started');
+};
+
+AbstractServerlessControl.prototype.killAdditionalAuxiliaryProcesses = function killDownstreamDummy() {
+  return this.killChildProcess(this.metadataMock);
+};
+
 Control.prototype.startMonitoredProcess = function startMonitoredProcess() {
   this.fargateTask = fork(this.opts.fargateTaskPath, {
     stdio: config.getAppStdio(),
     execArgv: ['--require', PATH_TO_INSTANA_FARGATE_PACKAGE],
     env: Object.assign(
       {
+        ECS_CONTAINER_METADATA_URI: this.metadataMockUrl,
         TASK_HTTP_PORT: this.port,
         DOWNSTREAM_DUMMY_URL: this.downstreamDummyUrl,
         INSTANA_DISABLE_CA_CHECK: true,
         INSTANA_ENDPOINT_URL: this.backendBaseUrl,
-        INSTANA_AGENT_KEY: this.instanaAgentKey
+        INSTANA_AGENT_KEY: this.instanaAgentKey,
+        INSTANA_DEV_MIN_DELAY_BEFORE_SENDING_SPANS: '0',
+        INSTANA_FORCE_TRANSMISSION_STARTING_AT: '1',
+        INSTANA_LOG_LEVEL: 'debug'
       },
       process.env,
       this.opts.env
@@ -70,16 +93,21 @@ Control.prototype.startMonitoredProcess = function startMonitoredProcess() {
   });
 
   this.fargateTask.on('message', message => {
-    if (message.type === 'fargate-result') {
-      if (message.error) {
-        this.fargateErrors.push(message.payload);
-      } else {
-        this.fargateResults.push(message.payload);
-      }
-    } else {
-      this.messageFromFargateTask.push(message);
-    }
+    this.messageFromFargateTask.push(message);
   });
+};
+
+Control.prototype.hasMonitoredProcessStartedPromise = function hasMonitoredProcessStartedPromise() {
+  if (this.hasMonitoredProcessStarted()) {
+    return this.getMetrics().then(metrics => {
+      if (metrics.length >= 1) {
+        return true;
+      }
+      throw new Error('The monitored process has started but has failed to report any data to the back end.');
+    });
+  } else {
+    return Promise.reject(new Error('The monitored process has still not started.'));
+  }
 };
 
 Control.prototype.hasMonitoredProcessStarted = function hasMonitoredProcessStarted() {
@@ -95,14 +123,6 @@ Control.prototype.killMonitoredProcess = function killMonitoredProcess() {
     return this.killChildProcess(this.fargateTask);
   }
   return Promise.resolve();
-};
-
-Control.prototype.getLambdaResults = function getLambdaResults() {
-  return this.fargateResults;
-};
-
-Control.prototype.getLambdaErrors = function getLambdaErrors() {
-  return this.fargateErrors;
 };
 
 Control.prototype.sendRequest = function(opts) {
