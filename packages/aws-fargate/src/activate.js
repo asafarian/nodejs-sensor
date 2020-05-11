@@ -1,92 +1,60 @@
 'use strict';
 
-const fetch = require('node-fetch');
-
 const instanaCore = require('@instana/core');
 const { backendConnector, consoleLogger } = require('@instana/serverless');
 
-const { fullyQualifiedContainerId, readSnapshotData } = require('./metadata');
 const identityProvider = require('./identity_provider');
 const metrics = require('./metrics');
+const InstrumentedEcsContainerProcessor = require('./metrics/container/InstrumentedEcsContainerProcessor');
 
-const { tracing } = instanaCore;
-const metricsSender = instanaCore.metrics.sender;
+const { tracing, util: coreUtil } = instanaCore;
+const { normalizeConfig } = coreUtil;
+
+let logger = consoleLogger;
+
+let config = {};
 
 // @instana/collector sends metric and span data every second. To reduce HTTP overhead we throttle this back:
-// Metrics will be send every 2.5 seconds, spans every 5 seconds.
-const config = {};
+// Metrics will be send every second, spans every 5 seconds.
 
-if (!process.env.INSTANA_METRICS_TRANSMISSION_DELAY) {
-  config.metrics = {
-    transmissionDelay: 2500
-  };
-}
 if (!process.env.INSTANA_TRACING_TRANSMISSION_DELAY) {
   config.tracing = {
     transmissionDelay: 5000
   };
 }
 
-let logger = consoleLogger;
+config = normalizeConfig(config);
 
 function init() {
   if (process.env.INSTANA_DEBUG || process.env.INSTANA_LOG_LEVEL) {
     logger.setLevel(process.env.INSTANA_DEBUG ? 'debug' : process.env.INSTANA_LOG_LEVEL);
   }
 
-  const metadataUriKey = 'ECS_CONTAINER_METADATA_URI';
-  const metadataUri = process.env.ECS_CONTAINER_METADATA_URI;
-  if (!metadataUri) {
-    logger.error(`${metadataUriKey} is not set. This fargate task will not be monitored.`);
-    return;
-  }
-
   instanaCore.preInit();
-  logger.debug(`Retrieving ECS metadata from ${metadataUri}.`);
-  fetch(`${metadataUri}`)
-    .then(res => res.text())
-    .then(txt => {
-      let json;
-      try {
-        json = JSON.parse(txt);
-      } catch (jsonError) {
-        logger.error(`Received invalid JSON from ${metadataUri}: ${txt}`);
-        logger.error('This fargate task will not be monitored.', jsonError);
-        return;
-      }
 
-      try {
-        const snapshotData = readSnapshotData(json);
-        const containerId = fullyQualifiedContainerId(snapshotData);
-        identityProvider.init(snapshotData.taskArn, containerId);
-        backendConnector.init(identityProvider, logger, false);
+  metrics.init(config, function onReady(err, payload) {
+    if (err) {
+      logger.error('Initializing @instana/aws-fargate failed. This fargate task will not be monitored.', err);
+      metrics.deactivate();
+      return;
+    }
 
-        instanaCore.util.compression.setBlacklist([
-          //
-          ['taskDefinition'],
-          ['taskDefinitionVersion']
-        ]);
-        instanaCore.init(config, backendConnector, identityProvider);
+    try {
+      const taskArn = payload.data.taskArn;
+      const containerId = InstrumentedEcsContainerProcessor.fullyQualifiedContainerId(
+        taskArn,
+        payload.data.containerName
+      );
 
-        metrics.init(config, containerId, snapshotData);
-        metrics.activate();
-        metricsSender.activate(metrics, backendConnector, metricsData => ({
-          plugins: [
-            {
-              name: 'com.instana.plugin.aws.ecs.container',
-              entityId: identityProvider.getEntityId(),
-              data: metricsData
-            }
-          ]
-        }));
-        tracing.activate();
-      } catch (e) {
-        logger.error('Initializing @instana/aws-fargate failed. This fargate task will not be monitored.', e);
-      }
-    })
-    .catch(e => {
-      logger.error(`Fetching metadata from ${metadataUri} failed. This fargate task will not be monitored.`, e);
-    });
+      identityProvider.init(taskArn, containerId);
+      backendConnector.init(identityProvider, logger, false);
+      instanaCore.init(config, backendConnector, identityProvider);
+      metrics.activate(backendConnector);
+      tracing.activate();
+    } catch (e) {
+      logger.error('Initializing @instana/aws-fargate failed. This fargate task will not be monitored.', e);
+    }
+  });
 }
 
 init();

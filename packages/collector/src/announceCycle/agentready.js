@@ -37,7 +37,6 @@ function enter(_ctx) {
   metricsSender.activate(
     metrics,
     agentConnection,
-    null,
     function onSuccess(requests) {
       requestHandler.handleRequests(requests);
     },

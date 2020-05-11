@@ -2,6 +2,6 @@ module.exports = {
   extends: '../../.eslintrc.js',
 
   parserOptions: {
-    ecmaVersion: 6
+    ecmaVersion: 2018
   }
 };

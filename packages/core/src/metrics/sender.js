@@ -13,7 +13,6 @@ var transmissionsSinceLastFullDataEmit = 0;
 
 var metrics;
 var downstreamConnection;
-var preprocess;
 var onSuccess;
 var onError;
 
@@ -26,10 +25,9 @@ exports.init = function init(config) {
   transmissionDelay = config.metrics.transmissionDelay;
 };
 
-exports.activate = function activate(_metrics, _downstreamConnection, _preprocess, _onSuccess, _onError) {
+exports.activate = function activate(_metrics, _downstreamConnection, _onSuccess, _onError) {
   metrics = _metrics;
   downstreamConnection = _downstreamConnection;
-  preprocess = _preprocess;
   onSuccess = _onSuccess;
   onError = _onError;
 
@@ -80,16 +78,12 @@ function sendMetrics() {
     payload = compression(previousTransmittedValue, newValueToTransmit);
   }
 
-  if (preprocess) {
-    payload = preprocess(payload);
-  }
-
   downstreamConnection.sendMetrics(payload, onMetricsHaveBeenSent.bind(null, isFullTransmission, newValueToTransmit));
 }
 
 function onMetricsHaveBeenSent(isFullTransmission, transmittedValue, error, responsePayload) {
   if (error) {
-    logger.error('Error received while trying to send metrics: %s', error.message);
+    logger.error('Error received while trying to send snapshot data and metrics: %s', error.message);
     if (onError) {
       onError();
     }

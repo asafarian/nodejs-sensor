@@ -19,11 +19,3 @@ exports.allMetrics = [
   require('./name'),
   require('./version')
 ];
-
-exports.setLogger = function setLogger(logger) {
-  exports.allMetrics.forEach(function(metricModule) {
-    if (typeof metricModule.setLogger === 'function') {
-      metricModule.setLogger(logger);
-    }
-  });
-};

@@ -7,6 +7,11 @@ var sender = require('./sender');
 
 var config;
 
+exports.init = function(_config) {
+  config = _config;
+  sender.init(config);
+};
+
 exports.findAndRequire = function findAndRequire(baseDir) {
   return fs
     .readdirSync(baseDir)
@@ -27,11 +32,6 @@ var metricsModules = exports.findAndRequire(__dirname);
 
 exports.registerAdditionalMetrics = function registerAdditionalMetrics(additionalMetricsModules) {
   metricsModules = metricsModules.concat(additionalMetricsModules);
-};
-
-exports.init = function(_config) {
-  config = _config;
-  sender.init(config);
 };
 
 exports.activate = function() {
@@ -58,6 +58,14 @@ exports.gatherData = function gatherData() {
   });
 
   return payload;
+};
+
+exports.setLogger = function setLogger(logger) {
+  metricsModules.forEach(function(metricModule) {
+    if (typeof metricModule.setLogger === 'function') {
+      metricModule.setLogger(logger);
+    }
+  });
 };
 
 exports.sender = sender;

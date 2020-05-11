@@ -1,41 +1,32 @@
 'use strict';
 
-const { metrics: coreMetrics } = require('@instana/core');
 const { consoleLogger } = require('@instana/serverless');
-const sharedMetrics = require('@instana/shared-metrics');
 
-const simpleSnapshotAttribute = require('./simple');
+const transmissionCycle = require('./transmissionCycle');
 
-sharedMetrics.setLogger(consoleLogger);
+let logger = consoleLogger;
 
-exports.init = function init(config, containerId, snapshotData) {
-  coreMetrics.registerAdditionalMetrics(sharedMetrics.allMetrics);
-  coreMetrics.registerAdditionalMetrics(
-    [
-      simpleSnapshotAttribute.create('runtime', 'node'),
-      simpleSnapshotAttribute.create('containerId', containerId)
-    ].concat(
-      Object.keys(snapshotData).map(function(key) {
-        return simpleSnapshotAttribute.create(key, snapshotData[key]);
-      })
-    )
-  );
+const metadataUriKey = 'ECS_CONTAINER_METADATA_URI';
 
-  coreMetrics.init(config);
-};
+exports.init = function init(config, onReady) {
+  const metadataUri = process.env.ECS_CONTAINER_METADATA_URI;
+  if (!metadataUri) {
+    logger.error(`${metadataUriKey} is not set. This fargate task will not be monitored.`);
+    return;
+  }
 
-exports.setLogger = function(_logger) {
-  sharedMetrics.setLogger(_logger);
+  transmissionCycle.init(config, metadataUri, onReady);
 };
 
 exports.activate = function activate() {
-  coreMetrics.activate();
+  transmissionCycle.activate();
 };
 
 exports.deactivate = function deactivate() {
-  coreMetrics.deactivate();
+  transmissionCycle.deactivate();
 };
 
-exports.gatherData = function gatherData() {
-  return coreMetrics.gatherData();
+exports.setLogger = function setLogger(_logger) {
+  logger = _logger;
+  transmissionCycle.setLogger(logger);
 };

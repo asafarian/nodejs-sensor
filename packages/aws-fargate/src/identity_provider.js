@@ -12,10 +12,6 @@ exports.getHostHeader = function getHostHeader() {
   return taskArn;
 };
 
-exports.getEntityId = function getEntityId() {
-  return containerId;
-};
-
 exports.getFrom = function getFrom() {
   return {
     hl: true,
