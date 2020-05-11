@@ -2,7 +2,7 @@
 
 var instanaCore = require('@instana/core');
 var tracing = instanaCore.tracing;
-var metricsSender = instanaCore.metrics.sender;
+var transmissionCycle = require('../metrics/transmissionCycle');
 
 var metrics = require('../metrics');
 var uncaught = require('../uncaught');
@@ -34,7 +34,7 @@ function enter(_ctx) {
   ctx = _ctx;
   uncaught.activate();
   metrics.activate();
-  metricsSender.activate(
+  transmissionCycle.activate(
     metrics,
     agentConnection,
     function onSuccess(requests) {
@@ -53,7 +53,7 @@ function enter(_ctx) {
 function leave() {
   uncaught.deactivate();
   metrics.deactivate();
-  metricsSender.deactivate();
+  transmissionCycle.deactivate();
   tracing.deactivate();
   requestHandler.deactivate();
   if (tracingMetricsTimeout) {

@@ -1,7 +1,7 @@
 'use strict';
 
-var clone = require('../util/clone');
-var compression = require('../util/compression');
+var clone = require('@instana/core').util.clone;
+var compression = require('@instana/core').util.compression;
 
 var logger;
 logger = require('../logger').getLogger('metrics/sender', function(newLogger) {

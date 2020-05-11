@@ -3,13 +3,10 @@
 var fs = require('fs');
 var path = require('path');
 
-var sender = require('./sender');
-
 var config;
 
 exports.init = function(_config) {
   config = _config;
-  sender.init(config);
 };
 
 exports.findAndRequire = function findAndRequire(baseDir) {
@@ -67,5 +64,3 @@ exports.setLogger = function setLogger(logger) {
     }
   });
 };
-
-exports.sender = sender;

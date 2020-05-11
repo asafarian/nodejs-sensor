@@ -2,6 +2,7 @@
 
 var coreMetrics = require('@instana/core').metrics;
 var sharedMetrics = require('@instana/shared-metrics');
+var transmissionCycle = require('./transmissionCycle');
 
 coreMetrics.registerAdditionalMetrics(sharedMetrics.allMetrics);
 var additionalCollectorMetrics = coreMetrics.findAndRequire(__dirname);
@@ -14,6 +15,7 @@ coreMetrics.setLogger(logger);
 
 exports.init = function(config) {
   coreMetrics.init(config);
+  transmissionCycle.init(config);
 };
 
 exports.activate = function() {
